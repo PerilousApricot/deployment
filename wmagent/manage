@@ -141,7 +141,7 @@ load_secrets_file(){
     local MATCH_MYSQL_PASS=`cat $WMAGENT_SECRETS_LOCATION | grep MYSQL_PASS | sed s/MYSQL_PASS=//`
     local MATCH_COUCH_USER=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_USER | sed s/COUCH_USER=//`
     local MATCH_COUCH_PASS=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_PASS | sed s/COUCH_PASS=//`
-    local MATCH_COUCH_HOST=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_HOST | sed s/COUCH_HOST=//`
+    local MATCH_COUCH_HOST=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_HOST | grep -v COUCH_HOST_NAME | sed s/COUCH_HOST=//`
     local MATCH_COUCH_HOST_NAME=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_HOST_NAME | sed s/COUCH_HOST_NAME=//`
     local MATCH_COUCH_PORT=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_PORT | sed s/COUCH_PORT=//`
     local MATCH_COUCH_CERT_FILE=`cat $WMAGENT_SECRETS_LOCATION | grep COUCH_CERT_FILE | sed s/COUCH_CERT_FILE=//`
@@ -498,6 +498,7 @@ db_prompt(){
 #
 init_couch_pre(){
     echo "Initialising CouchDB on $COUCH_HOST:$COUCH_PORT..."
+    echo "MODIFYING $CONFIG_COUCH/local.ini"
     mkdir -p $INSTALL_COUCH/logs
     mkdir -p $INSTALL_COUCH/database
     perl -p -i -e "s{deploy_project_root/couchdb}{$INSTALL_COUCH}" $CONFIG_COUCH/local.ini
