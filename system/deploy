@@ -108,7 +108,7 @@ system_groups_and_accounts()
             T:100038:_reqmon    T:100039:_crabserver  T:100040:_crabcache  \
             T:100041:_dmwmmon   T:100042:_an_reqmgr   T:100043:_an_workqueue\
             T:100044:_an_reqmon T:100045:_t0wmadatasvc T:100046:_dbsmigration\
-            T:100047:_t0_reqmon; do
+            T:100047:_t0_reqmon T:100048:_reqmgr2     T:100049:_acdcserver; do
     add_local_group $(echo $ng | tr : " ")
   done
 
@@ -143,12 +143,15 @@ system_groups_and_accounts()
   add_local_user 100045 _t0wmadatasvc ,_config "T0 WMAgent Data Service App"
   add_local_user 100046 _dbsmigration ,_config "DBS Migration Server"
   add_local_user 100047 _t0_reqmon    ,_config "ReqMon App for T0"
+  add_local_user 100048 _reqmgr2      ,_config "ReqMgr2 App"
+  add_local_user 100049 _acdcserver   ,_config "ACDC Server App"
 
   # Restart nscd to flush account changes. Current account will _not_
   # see these changes before logout/login however, so commands below
   # cannot rely on fully propagated group ownership!
+  # Ignore if nscd is not running (as for SLC6 VMs).
   case $system_arch in Linux )
-    sudo /sbin/service nscd restart ;;
+    sudo /sbin/service nscd restart || true ;;
   esac
 }
 
@@ -296,7 +299,8 @@ deploy_system_post()
                _dqmgui _filemover _overview _phedex _sitedb _t0mon \
                _mongodb _reqmgr _workqueue _configcache _t0datasvc _reqmon \
                _crabserver _crabcache _dmwmmon _an_reqmgr _an_workqueue \
-               _an_reqmon _t0wmadatasvc _dbsmigration _t0_reqmon; do
+               _an_reqmon _t0wmadatasvc _dbsmigration _t0_reqmon _reqmgr2 \
+               _acdcserver; do
         case " $G " in *" $g "* ) ;; * ) note "ERROR: no $g group"; exit 1;; esac
       done
 
@@ -439,20 +443,34 @@ deploy_system_post()
       sudo perl -p -i -e \
        "s/^(?=Defaults\s+requiretty)/\#/;
 	s/^$USER\s+ALL=\(ALL\)\s+ALL$/$USER ALL=(ALL) NOPASSWD: ALL/" \
-        /etc/sudoers
+        /etc/sudoers /etc/sudoers.d/cern-config-users 2> /dev/null
 
-      # Install additional yum repositories (glite-VOBOX instead of glite-SCAS?)
-      sudo wget -q -O /etc/yum.repos.d/glite-lcg-ca.repo \
-        http://cern.ch/grid-deployment/glite/repos/3.2/lcg-CA.repo
+      # Install additional yum repositories
+      #  EGI-trustanchors provides the updated CAs
+      sudo wget -q -O /etc/yum.repos.d/egi-trustanchors.repo \
+        http://repository.egi.eu/sw/production/cas/1/current/repo-files/egi-trustanchors.repo
+      #  (glite-VOBOX instead of glite-SCAS?)
       sudo wget -q -O /etc/yum.repos.d/glite-scas.repo \
         http://cern.ch/grid-deployment/glite/repos/3.2/glite-SCAS.repo
 
       # Install additional required packages.
       sudo yum -y install \
         tk compat-libstdc++-33 'ca_*' dummy-ca-certs lcg-CA \
-	fetch-crl edg-mkgridmap git-all stgit colordiff \
+	fetch-crl edg-mkgridmap git-all stgit colordiff libXpm-devel finger \
 	$(yum -q list compat-{readline5,libtermcap} perl-ExtUtils-Embed 2>/dev/null | \
 	  grep -v -e '^Installed' -e '^Available' | awk '{print $1}')
+
+      # Install myproxy and voms tools as there is no slc6 build for it in AFS.
+      # Only gets the voms configuration from AFS.
+      sudo yum -y install myproxy
+      sudo rsync -cavu \
+        /afs/cern.ch/project/gd/LCG-share/current/glite/etc/vomses/ /etc/vomses/
+      sudo rsync -cavu \
+        /afs/cern.ch/project/gd/LCG-share/current/external/etc/grid-security/vomsdir/ \
+        /etc/grid-security/vomsdir/
+      sudo chown -R root:root /etc/vomses /etc/grid-security/vomsdir
+
+      # Should be ok to use bashs from slc5 on slc6. There is no build for slc6 yet.
       if rpm --quiet -q bashs; then :; else
         sudo rpm -ivh http://swrepsrv.cern.ch/swrep/x86_64_slc5/bashs-3.2-21.x86_64.rpm ||
 	  sudo ln /bin/bash{,s}
