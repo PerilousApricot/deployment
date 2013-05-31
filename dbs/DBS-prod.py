@@ -9,9 +9,9 @@ DBSVERSION = os.getenv('DBS3_VERSION')
 
 sys.path.append(os.path.join(ROOTDIR,'auth/dbs'))
 
-from DBSSecrets import dbs3_l3_i2
+from DBSSecrets import dbs3_ig_i2
 from DBSSecrets import dbs3_pg_r
-from DBSSecrets import dbs3_l1_i2
+from DBSSecrets import dbs3_dg_i2
 
 config = Configuration()
 config.component_('SecurityModule')
@@ -50,15 +50,15 @@ db_production_global.connectUrl = dbs3_pg_r['connectUrl']['reader']
 db_production_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 db_development_global = db_instances.section_('dev/global')
-db_development_global.dbowner = dbs3_l1_i2['databaseOwner']
+db_development_global.dbowner = dbs3_dg_i2['databaseOwner']
 db_development_global.version = DBSVERSION
-db_development_global.connectUrl = dbs3_l1_i2['connectUrl']['reader']
+db_development_global.connectUrl = dbs3_dg_i2['connectUrl']['reader']
 db_development_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 db_integration_global = db_instances.section_('int/global')
-db_integration_global.dbowner = dbs3_l3_i2['databaseOwner']
+db_integration_global.dbowner = dbs3_ig_i2['databaseOwner']
 db_integration_global.version = DBSVERSION
-db_integration_global.connectUrl = dbs3_l3_i2['connectUrl']['reader']
+db_integration_global.connectUrl = dbs3_ig_i2['connectUrl']['reader']
 db_integration_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 active.section_('DBSWriter')
@@ -77,21 +77,21 @@ db_production_global.connectUrl = dbs3_pg_r['connectUrl']['writer']
 db_production_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 db_development_global = db_instances.section_('dev/global')
-db_development_global.dbowner = dbs3_l1_i2['databaseOwner']
+db_development_global.dbowner = dbs3_dg_i2['databaseOwner']
 db_development_global.version = DBSVERSION
-db_development_global.connectUrl = dbs3_l1_i2['connectUrl']['writer']
+db_development_global.connectUrl = dbs3_dg_i2['connectUrl']['writer']
 db_development_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 db_integration_global = db_instances.section_('int/global')
-db_integration_global.dbowner = dbs3_l3_i2['databaseOwner']
+db_integration_global.dbowner = dbs3_ig_i2['databaseOwner']
 db_integration_global.version = DBSVERSION
-db_integration_global.connectUrl = dbs3_l3_i2['connectUrl']['writer']
+db_integration_global.connectUrl = dbs3_ig_i2['connectUrl']['writer']
 db_integration_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 active.DBSWriter.section_('security')
 security_instances = active.DBSWriter.security.section_('instances')
 security_production_global = security_instances.section_('prod/global')
-security_production_global.params = {'dbs' : 'operator', 'dataops' : 'production operator'}
+security_production_global.params = {'dbs' : 'operator', 'dataops' : 'production-operator'}
 security_development_global = security_instances.section_('dev/global')
 security_development_global.params = {}
 security_integration_global = security_instances.section_('int/global')
@@ -113,21 +113,21 @@ db_production_global.connectUrl = dbs3_pg_r['connectUrl']['writer']
 db_production_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 db_development_global = db_instances.section_('dev/global')
-db_development_global.dbowner = dbs3_l1_i2['databaseOwner']
+db_development_global.dbowner = dbs3_dg_i2['databaseOwner']
 db_development_global.version = DBSVERSION
-db_development_global.connectUrl = dbs3_l1_i2['connectUrl']['writer']
+db_development_global.connectUrl = dbs3_dg_i2['connectUrl']['writer']
 db_development_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 db_integration_global = db_instances.section_('int/global')
-db_integration_global.dbowner = dbs3_l3_i2['databaseOwner']
+db_integration_global.dbowner = dbs3_ig_i2['databaseOwner']
 db_integration_global.version = DBSVERSION
-db_integration_global.connectUrl = dbs3_l3_i2['connectUrl']['writer']
+db_integration_global.connectUrl = dbs3_ig_i2['connectUrl']['writer']
 db_integration_global.engineParameters = { 'pool_size' : 15, 'max_overflow' : 10, 'pool_timeout' : 200 }
 
 active.DBSMigrate.section_('security')
 security_instances = active.DBSMigrate.security.section_('instances')
 security_production_global = security_instances.section_('prod/global')
-security_production_global.params = {'dbs' : 'operator', 'dataops' : 'production operator'}
+security_production_global.params = {'dbs' : 'operator', 'dataops' : 'production-operator'}
 security_development_global = security_instances.section_('dev/global')
 security_development_global.params = {}
 security_integration_global = security_instances.section_('int/global')
